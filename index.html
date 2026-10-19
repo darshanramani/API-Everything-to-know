@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Backend APIs & FastAPI, Step by Step</title>
+  <meta name="description" content="A visual, animated beginner's guide to backend APIs and FastAPI: HTTP, methods, status codes, JSON, REST, path and query parameters, Pydantic validation, dependencies, async, docs and auth, with a live API playground.">
+  <meta property="og:title" content="Backend APIs & FastAPI, Step by Step">
+  <meta property="og:description" content="Learn how backend APIs work and build one with FastAPI, one animated step at a time.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230c8577'/><path d='M36 8 18 36h12l-4 20 20-30H34z' fill='white'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="progress" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+
+<header class="topbar">
+  <a class="brand" href="#top"><span class="brand-mark">⚡</span><span>FastAPI <em>step by step</em></span></a>
+  <div class="topbar-right">
+    <span class="step-indicator" id="stepIndicator">Introduction</span>
+    <button id="themeToggle" class="icon-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26 5.4 5.4 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="sidenav" id="sidenav" aria-label="Sections"></nav>
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="top" data-title="Introduction">
+    <div class="hero-text">
+      <p class="eyebrow">A visual guide for beginners</p>
+      <h1>How do apps <span class="hl">talk</span> to servers?</h1>
+      <p class="lead">Every app you use, from Instagram to your bank, sends requests to a <strong>backend API</strong>. This page shows how those requests work, then teaches you to build your own API with <strong>FastAPI</strong>, the popular Python framework, one animated step at a time.</p>
+      <div class="hero-cta">
+        <a class="btn primary" href="#s1">Start learning ↓</a>
+        <a class="btn ghost" href="#playground">Jump to the API playground</a>
+      </div>
+      <ul class="hero-meta">
+        <li>16 short steps</li>
+        <li>About 30 minutes</li>
+        <li>Basic Python is enough</li>
+      </ul>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hv-node hv-q"><span class="hv-ico">💻</span><b>Request</b><small><span class="m m-get">GET</span> /todos/1</small></div>
+      <div class="hv-track"><i></i><i></i><i></i></div>
+      <div class="hv-node hv-r"><span class="hv-ico">⚡</span><b>FastAPI</b><small>route → validate → your code</small></div>
+      <div class="hv-track"><i></i><i></i><i></i></div>
+      <div class="hv-node hv-a"><span class="hv-ico">✓</span><b>Response</b><small>200 OK · {"title": "Learn HTTP basics"}</small></div>
+    </div>
+  </section>
+
+  <!-- ============ PART 1 ============ -->
+  <div class="part"><span class="part-num">Part 1</span><h2>How backend APIs work</h2><p>These ideas apply to every web API, whatever language it's written in.</p></div>
+
+  <section class="step" id="s1" data-title="What is a backend API?" data-step="1">
+    <div class="step-text">
+      <span class="step-num">Step 01</span>
+      <h2>What is a backend API?</h2>
+      <p>Think of an app like a restaurant. You (the <strong>frontend</strong>) never walk into the kitchen. You give your order to a waiter, who brings back your food.</p>
+      <ul class="ticks">
+        <li><b>Frontend</b>: what users see, like a website or mobile app.</li>
+        <li><b>API</b>: the waiter. A fixed set of “orders” the frontend is allowed to place.</li>
+        <li><b>Backend</b>: the kitchen. Business rules, security and calculations live here.</li>
+        <li><b>Database</b>: the pantry, where data is stored long-term.</li>
+      </ul>
+      <div class="callout"><b>Why separate them?</b> One backend can serve a website, an iPhone app and an Android app at the same time, and the database stays safely hidden behind it.</div>
+    </div>
+    <div class="stage" data-anim="restaurant">
+      <div class="stage-head"><span class="stage-label">The restaurant analogy</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="rest">
+        <div class="rest-col"><div class="rest-ico">🧑</div><b>Customer</b><small>Frontend</small></div>
+        <div class="rest-col"><div class="rest-ico">🤵</div><b>Waiter</b><small>API</small></div>
+        <div class="rest-col"><div class="rest-ico">👩‍🍳</div><b>Kitchen</b><small>Backend</small></div>
+        <div class="rest-col"><div class="rest-ico">🗄️</div><b>Pantry</b><small>Database</small></div>
+        <div class="rest-track"><div class="rest-token" id="restToken">📝 order</div></div>
+      </div>
+      <p class="caption" id="restCaption" aria-live="polite">Press replay to watch an order travel.</p>
+    </div>
+  </section>
+
+  <section class="step" id="s2" data-title="Request & response" data-step="2">
+    <div class="step-text">
+      <span class="step-num">Step 02</span>
+      <h2>Request and response: the HTTP conversation</h2>
+      <p>Apps and servers talk using <strong>HTTP</strong>. The rule is simple: the client sends a <strong>request</strong>, and the server sends back exactly one <strong>response</strong>.</p>
+      <p>Underneath, both are just plain text. The animation shows the real text that travels over the network when an app asks for todo number 1.</p>
+      <div class="callout"><b>Client</b> = whoever sends the request (browser, phone app, another server, a Python script). <b>Server</b> = the program that answers.</div>
+    </div>
+    <div class="stage" data-anim="http">
+      <div class="stage-head"><span class="stage-label">One round trip</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="wire">
+        <div class="wire-end"><span>💻</span><b>Client</b></div>
+        <div class="wire-line"><div class="packet" id="packet"></div></div>
+        <div class="wire-end"><span>🖥️</span><b>Server</b></div>
+      </div>
+      <p class="server-status" id="serverStatus">&nbsp;</p>
+      <div class="raw-pair">
+        <div><span class="raw-tag req">REQUEST</span><pre class="raw" id="rawReq"></pre></div>
+        <div><span class="raw-tag res">RESPONSE</span><pre class="raw" id="rawRes"></pre></div>
+      </div>
+      <p class="rtt" id="rtt">&nbsp;</p>
+    </div>
+  </section>
+
+  <section class="step" id="s3" data-title="Anatomy of a request" data-step="3">
+    <div class="step-text">
+      <span class="step-num">Step 03</span>
+      <h2>Anatomy of a request</h2>
+      <p>Every HTTP request is built from the same five parts. Once you can read these, you can read any API's documentation.</p>
+      <p><b>Try it:</b> click a coloured part of the request, or use the buttons below it.</p>
+      <div class="callout"><b>URL = </b>host + path + query. <code>https://api.example.com/users?notify=true</code></div>
+    </div>
+    <div class="stage" data-anim="anatomy">
+      <div class="stage-head"><span class="stage-label">Click a part</span><button class="replay" type="button">↻ Replay</button></div>
+<pre class="raw anatomy-req"><span class="ap" data-p="method">POST</span> <span class="ap" data-p="path">/users</span><span class="ap" data-p="query">?notify=true</span> HTTP/1.1
+<span class="ap" data-p="headers">Host: api.example.com
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOi…</span>
+
+<span class="ap" data-p="body">{
+  "name": "Asha",
+  "email": "asha@example.com"
+}</span></pre>
+      <div class="ap-tabs" id="apTabs"></div>
+      <div class="ap-info" id="apInfo" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="step" id="s4" data-title="Methods & CRUD" data-step="4">
+    <div class="step-text">
+      <span class="step-num">Step 04</span>
+      <h2>HTTP methods: the verbs of an API</h2>
+      <p>Almost everything an app does with data is one of four operations, known as <strong>CRUD</strong>. Each one maps to an HTTP method:</p>
+      <table class="mini-table">
+        <tr><th>CRUD</th><th>Method</th><th>Example</th></tr>
+        <tr><td>Create</td><td><span class="m m-post">POST</span></td><td>add a todo</td></tr>
+        <tr><td>Read</td><td><span class="m m-get">GET</span></td><td>list or view todos</td></tr>
+        <tr><td>Update</td><td><span class="m m-put">PUT</span> <span class="m m-patch">PATCH</span></td><td>PUT replaces everything, PATCH changes some fields</td></tr>
+        <tr><td>Delete</td><td><span class="m m-delete">DELETE</span></td><td>remove a todo</td></tr>
+      </table>
+      <p><b>Try it:</b> click the buttons and watch the data change.</p>
+    </div>
+    <div class="stage" data-anim="crud">
+      <div class="stage-head"><span class="stage-label">CRUD on a todo list</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="crud-btns" id="crudBtns">
+        <button type="button" data-op="GET"><span class="m m-get">GET</span></button>
+        <button type="button" data-op="POST"><span class="m m-post">POST</span></button>
+        <button type="button" data-op="PUT"><span class="m m-put">PUT</span></button>
+        <button type="button" data-op="PATCH"><span class="m m-patch">PATCH</span></button>
+        <button type="button" data-op="DELETE"><span class="m m-delete">DELETE</span></button>
+      </div>
+      <div class="crud-req" id="crudReq">&nbsp;</div>
+      <table class="crud-table">
+        <thead><tr><th>id</th><th>title</th><th>done</th></tr></thead>
+        <tbody id="crudBody"></tbody>
+      </table>
+      <div class="crud-res" id="crudRes">&nbsp;</div>
+    </div>
+  </section>
+
+  <section class="step" id="s5" data-title="Status codes" data-step="5">
+    <div class="step-text">
+      <span class="step-num">Step 05</span>
+      <h2>Status codes: how did it go?</h2>
+      <p>Every response starts with a three-digit <strong>status code</strong>. The first digit tells you the category, so you can understand most codes at a glance:</p>
+      <ul class="ticks">
+        <li><b>2xx</b>: success, it worked.</li>
+        <li><b>3xx</b>: redirect, look somewhere else.</li>
+        <li><b>4xx</b>: client error. <em>You</em> sent something wrong.</li>
+        <li><b>5xx</b>: server error. <em>The server</em> broke.</li>
+      </ul>
+      <p><b>Try it:</b> click any code to see what it means.</p>
+    </div>
+    <div class="stage" data-anim="status">
+      <div class="stage-head"><span class="stage-label">Sorting status codes</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="sc-pile" id="scPile"></div>
+      <div class="sc-buckets">
+        <div class="sc-bucket b2"><h4>2xx <small>Success</small></h4><div class="sc-drop" data-b="2"></div></div>
+        <div class="sc-bucket b3"><h4>3xx <small>Redirect</small></h4><div class="sc-drop" data-b="3"></div></div>
+        <div class="sc-bucket b4"><h4>4xx <small>Client error</small></h4><div class="sc-drop" data-b="4"></div></div>
+        <div class="sc-bucket b5"><h4>5xx <small>Server error</small></h4><div class="sc-drop" data-b="5"></div></div>
+      </div>
+      <p class="caption" id="scInfo" aria-live="polite">&nbsp;</p>
+    </div>
+  </section>
+
+  <section class="step" id="s6" data-title="JSON" data-step="6">
+    <div class="step-text">
+      <span class="step-num">Step 06</span>
+      <h2>JSON: the language of APIs</h2>
+      <p>Requests and responses need a data format that every programming language can read. Almost every modern API uses <strong>JSON</strong>.</p>
+      <p>JSON looks a lot like a Python dictionary, with a few small differences. When your FastAPI function returns a dict, FastAPI converts it to JSON for you.</p>
+      <div class="callout"><b>Remember:</b> JSON is just text. Turning a Python object into JSON text is called <em>serialising</em>; reading it back is <em>parsing</em>.</div>
+    </div>
+    <div class="stage" data-anim="json">
+      <div class="stage-head"><span class="stage-label">Python dict → JSON</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="json-grid" id="jsonGrid">
+        <div class="jg-head">🐍 Python</div><div></div><div class="jg-head">📄 JSON</div>
+      </div>
+      <p class="caption" id="jsonNote">&nbsp;</p>
+    </div>
+  </section>
+
+  <section class="step" id="s7" data-title="REST design" data-step="7">
+    <div class="step-text">
+      <span class="step-num">Step 07</span>
+      <h2>REST: designing clean URLs</h2>
+      <p><strong>REST</strong> is a set of conventions that makes APIs predictable. The key idea is that <b>the URL names a thing (a noun), and the HTTP method says what to do with it (the verb).</b></p>
+      <ul class="ticks">
+        <li>Use plural nouns for collections: <code>/todos</code></li>
+        <li>Put IDs in the path: <code>/todos/5</code></li>
+        <li>Put filters, search and paging in the query: <code>?done=true</code></li>
+        <li>Nest related things: <code>/users/7/todos</code></li>
+        <li>No verbs in URLs. The method already is the verb.</li>
+      </ul>
+    </div>
+    <div class="stage" data-anim="rest">
+      <div class="stage-head"><span class="stage-label">Before → after</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="rest-list" id="restList"></div>
+    </div>
+  </section>
+
+  <!-- ============ PART 2 ============ -->
+  <div class="part"><span class="part-num">Part 2</span><h2>Building APIs with FastAPI</h2><p>FastAPI turns ordinary Python functions with type hints into a fast, validated, self-documenting API.</p></div>
+
+  <section class="step" id="s8" data-title="Hello, FastAPI" data-step="8">
+    <div class="step-text">
+      <span class="step-num">Step 08</span>
+      <h2>Hello, FastAPI</h2>
+      <p>A complete API fits in 7 lines. Here's what each piece does:</p>
+      <ol class="nums">
+        <li><code>app = FastAPI()</code> creates your application.</li>
+        <li><code>@app.get("/")</code> is a <strong>decorator</strong>. It says “when someone sends GET to <code>/</code>, run the function below”.</li>
+        <li>The function returns a dict, and FastAPI sends it back as JSON.</li>
+      </ol>
+      <p><strong>Uvicorn</strong> is the server program that actually listens for requests and hands them to your app.</p>
+      <div class="callout"><b>Why FastAPI?</b> It's fast, it checks your data using type hints, it writes your API documentation automatically, and it supports async. It's one of the most popular Python web frameworks.</div>
+    </div>
+    <div class="stage" data-anim="hello">
+      <div class="stage-head"><span class="stage-label">main.py → running API</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="file-tab">main.py</div>
+<pre class="code reveal-lines" data-lang="py" id="helloCode">
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello, World!"}
+</pre>
+      <div class="term" id="helloTerm"><div class="term-bar"><i></i><i></i><i></i><span>Terminal</span></div><pre id="helloTermOut"></pre></div>
+      <div class="browser" id="helloBrowser">
+        <div class="browser-bar"><span class="b-dots"><i></i><i></i><i></i></span><span class="b-url">127.0.0.1:8000</span></div>
+        <pre class="browser-body" id="helloBody"></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="s9" data-title="Path & query parameters" data-step="9">
+    <div class="step-text">
+      <span class="step-num">Step 09</span>
+      <h2>Path and query parameters</h2>
+      <p>Most endpoints need input. FastAPI reads it straight from the URL and passes it to your function as normal arguments:</p>
+      <ul class="ticks">
+        <li><b>Path parameters</b> are in <code>{curly braces}</code> in the route. They're required.</li>
+        <li><b>Query parameters</b> are any other function arguments. Give them a default to make them optional.</li>
+      </ul>
+      <p>The <strong>type hints</strong> matter: <code>item_id: int</code> makes FastAPI convert <code>"42"</code> to <code>42</code>, and reject <code>"abc"</code> with a clear error.</p>
+      <p><b>Try it:</b> edit the URL or pick an example.</p>
+    </div>
+    <div class="stage" data-anim="params">
+      <div class="stage-head"><span class="stage-label">From URL to arguments</span><button class="replay" type="button">↻ Replay</button></div>
+<pre class="code" data-lang="py">
+@app.get("/items/{item_id}")
+def read_item(item_id: int,
+              q: str | None = None,
+              limit: int = 10):
+    return {"item_id": item_id, "q": q, "limit": limit}
+</pre>
+      <form class="url-form" id="paramsForm" autocomplete="off">
+        <span class="m m-get">GET</span>
+        <input id="paramsUrl" type="text" value="/items/42?q=phone&amp;limit=5" aria-label="URL path">
+        <button class="btn primary sm" type="submit">Send</button>
+      </form>
+      <div class="chips" id="paramsChips"></div>
+      <div class="url-colored" id="paramsColored"></div>
+      <div class="arg-table" id="paramsArgs"></div>
+      <div class="resp-box" id="paramsResp"></div>
+    </div>
+  </section>
+
+  <section class="step" id="s10" data-title="Pydantic validation" data-step="10">
+    <div class="step-text">
+      <span class="step-num">Step 10</span>
+      <h2>Request bodies and Pydantic validation</h2>
+      <p>To accept JSON data (for example to create a user), describe its shape with a <strong>Pydantic model</strong>, a class with type hints.</p>
+      <p>Before your function runs, FastAPI checks the incoming JSON against the model. If anything is wrong, it replies with <strong>422</strong> and a precise list of problems, and <b>your function never runs</b>. You get validation for free.</p>
+      <div class="callout"><b>Notice:</b> Pydantic is helpful, not just strict. The text <code>"24"</code> is converted to the number <code>24</code>, because that's clearly what was meant.</div>
+      <p class="muted small"><code>EmailStr</code> needs one extra package: <code>pip install "pydantic[email]"</code>.</p>
+    </div>
+    <div class="stage" data-anim="pydantic">
+      <div class="stage-head"><span class="stage-label">Validating a request body</span><button class="replay" type="button">↻ Replay</button></div>
+<pre class="code" data-lang="py">
+class User(BaseModel):
+    name: str
+    email: EmailStr
+    age: int = Field(ge=13, le=120)
+
+@app.post("/users", status_code=201)
+def create_user(user: User):
+    return user
+</pre>
+      <div class="chips" id="pydChips"></div>
+      <div class="pyd-row">
+        <div class="pyd-body"><span class="raw-tag req">POST /users · body</span><textarea id="pydBody" spellcheck="false" rows="6" aria-label="JSON body"></textarea><button class="btn primary sm" id="pydSend" type="button">Send</button></div>
+        <div class="pyd-gate"><span class="raw-tag">Pydantic checks</span><ul id="pydChecks"></ul></div>
+      </div>
+      <div class="resp-box" id="pydResp"></div>
+    </div>
+  </section>
+
+  <section class="step step--wide" id="s11" data-title="Request lifecycle" data-step="11">
+    <div class="step-text">
+      <span class="step-num">Step 11</span>
+      <h2>What happens inside FastAPI</h2>
+      <p>Between the request arriving and your function running, several layers do work for you. Any layer can stop the request early and send an error back, so your code only ever sees requests that passed every check. Pick a scenario to watch it travel.</p>
+    </div>
+    <div class="stage" data-anim="lifecycle">
+      <div class="stage-head">
+        <span class="stage-label">Request lifecycle</span>
+        <div class="lc-btns">
+          <button class="replay" type="button" data-scn="ok">▶ Valid request</button>
+          <button class="replay alt" type="button" data-scn="invalid">▶ Body missing a field</button>
+          <button class="replay alt" type="button" data-scn="notoken">▶ No token</button>
+        </div>
+      </div>
+      <p class="swipe-hint">Swipe sideways to see the whole pipeline →</p>
+      <div class="pipe-wrap"><svg class="pipe" viewBox="0 0 980 210" role="img" aria-label="FastAPI request lifecycle"></svg></div>
+      <div class="lc-out">
+        <p class="pipe-caption" id="lcCaption" aria-live="polite">Pick a scenario above.</p>
+        <div class="lc-result" id="lcResult"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="s12" data-title="Dependencies" data-step="12">
+    <div class="step-text">
+      <span class="step-num">Step 12</span>
+      <h2>Dependencies with <code>Depends()</code></h2>
+      <p>Many endpoints need the same things: a database session, the logged-in user, settings. Instead of repeating that code everywhere, you <strong>declare what you need</strong> and FastAPI provides it. This is called <strong>dependency injection</strong>.</p>
+<pre class="code" data-lang="py">
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db          # give it to the endpoint
+    finally:
+        db.close()        # runs after the response
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    return decode_token(token)
+
+@app.get("/me/todos")
+def my_todos(db: Session = Depends(get_db),
+             user: User = Depends(get_current_user)):
+    return db.query(Todo).filter_by(owner_id=user.id).all()
+</pre>
+      <div class="callout"><b>Bonus:</b> in tests you can swap a dependency for a fake (for example, a test database) without touching your endpoint code.</div>
+    </div>
+    <div class="stage" data-anim="di">
+      <div class="stage-head"><span class="stage-label">FastAPI fills in the blanks</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="di">
+        <div class="di-deps">
+          <div class="di-dep" id="diDb"><code>get_db()</code><span class="di-out" id="diDbOut">🗄️ Session</span></div>
+          <div class="di-dep" id="diUser"><code>get_current_user()</code><span class="di-out" id="diUserOut">👤 asha</span></div>
+        </div>
+        <div class="di-fn" id="diFn">
+          <code class="di-sig">my_todos(</code>
+          <div class="di-slot"><span>db =</span><span class="di-hole" id="diSlotDb">?</span></div>
+          <div class="di-slot"><span>user =</span><span class="di-hole" id="diSlotUser">?</span></div>
+          <code class="di-sig">)</code>
+          <div class="di-ret" id="diRet">→ returns [3 todos]</div>
+        </div>
+      </div>
+      <div class="di-cleanup" id="diCleanup">🧹 After the response is sent: <code>db.close()</code> ✓</div>
+      <p class="caption" id="diCaption" aria-live="polite">&nbsp;</p>
+    </div>
+  </section>
+
+  <section class="step" id="s13" data-title="async & await" data-step="13">
+    <div class="step-text">
+      <span class="step-num">Step 13</span>
+      <h2><code>async</code> and <code>await</code>: don't just stand there waiting</h2>
+      <p>Most of a request's time is spent <b>waiting</b>: for a database, a file, or another API. With <code>async def</code> and <code>await</code>, the server can serve other requests during that wait, like a waiter who takes new orders while the kitchen cooks.</p>
+<pre class="code" data-lang="py">
+@app.get("/report")
+async def report():
+    data = await db.fetch_all(query)  # server is free meanwhile
+    return data
+</pre>
+      <div class="callout warn"><b>Golden rule:</b> inside <code>async def</code>, never call blocking code such as <code>time.sleep()</code> or <code>requests.get()</code>. It freezes the whole server. Use await-able libraries (like <code>httpx</code> or <code>asyncpg</code>), or write a plain <code>def</code>: FastAPI runs plain functions in a thread pool, so they're safe.</div>
+    </div>
+    <div class="stage" data-anim="async">
+      <div class="stage-head"><span class="stage-label">3 requests, each waiting 1 s on the database</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="tl" id="tlBlock"><h4>async def + blocking call <small>(time.sleep, requests)</small></h4><div class="tl-rows"></div><div class="tl-total"></div></div>
+      <div class="tl" id="tlAsync"><h4>async def + <code>await</code></h4><div class="tl-rows"></div><div class="tl-total"></div></div>
+      <div class="tl-axis" id="tlAxis"></div>
+      <p class="tl-legend"><span><i class="cpu"></i>working (CPU)</span><span><i class="io"></i>waiting for the database</span><span><i class="queue"></i>stuck in the queue</span></p>
+    </div>
+  </section>
+
+  <section class="step" id="s14" data-title="Automatic docs" data-step="14">
+    <div class="step-text">
+      <span class="step-num">Step 14</span>
+      <h2>Free, interactive documentation</h2>
+      <p>FastAPI reads your routes, type hints and Pydantic models and builds an <strong>OpenAPI</strong> description of your API. From that, it serves interactive docs at <code>/docs</code> (Swagger UI) and <code>/redoc</code>.</p>
+      <p>Frontend developers, testers and future-you can see every endpoint and <b>try it in the browser</b>, with no extra work.</p>
+      <p><b>Try it:</b> this is a working copy of the Swagger UI for our Todo API. Expand an endpoint, click <em>Try it out</em>, then <em>Execute</em>.</p>
+    </div>
+    <div class="stage" data-anim="docs">
+      <div class="stage-head"><span class="stage-label">127.0.0.1:8000/docs</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="swag">
+        <div class="swag-head"><b>Todo API</b> <span class="swag-ver">1.0.0</span> <span class="swag-ver oas">OAS 3.1</span></div>
+        <div id="swagOps"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="s15" data-title="Authentication" data-step="15">
+    <div class="step-text">
+      <span class="step-num">Step 15</span>
+      <h2>Authentication with tokens</h2>
+      <p>Most APIs need to know <b>who</b> is calling. A common pattern is the <strong>bearer token</strong>:</p>
+      <ol class="nums">
+        <li>The client logs in once with a username and password.</li>
+        <li>The server replies with a signed token, often a <strong>JWT</strong>.</li>
+        <li>The client sends that token in the <code>Authorization</code> header on every request.</li>
+        <li>The server checks the signature. No valid token means <b>401</b>.</li>
+      </ol>
+      <p>FastAPI ships helpers for this (<code>OAuth2PasswordBearer</code>, <code>HTTPBearer</code>), and you plug them in with <code>Depends()</code>, exactly like in Step 12.</p>
+      <div class="callout warn"><b>Never</b> store plain passwords. Store a hash (bcrypt or argon2), and always use HTTPS so tokens can't be read in transit.</div>
+    </div>
+    <div class="stage" data-anim="auth">
+      <div class="stage-head"><span class="stage-label">Token login flow</span><button class="replay" type="button">↻ Replay</button></div>
+      <div class="seq">
+        <div class="seq-head"><span>💻 Client</span><span>⚡ API server</span></div>
+        <div class="seq-body" id="seqBody"></div>
+      </div>
+      <div class="jwt" id="jwt">
+        <p class="jwt-title">A JWT has 3 parts, separated by dots:</p>
+        <p class="jwt-token"><span class="j1">eyJhbGciOiJIUzI1NiJ9</span>.<span class="j2">eyJzdWIiOiJhc2hhIiwiZXhwIjoxNzY3MjI1NjAwfQ</span>.<span class="j3">Hk3d9xQ…</span></p>
+        <div class="jwt-parts">
+          <div class="j1b"><b>Header</b><code>{"alg": "HS256"}</code></div>
+          <div class="j2b"><b>Payload</b><code>{"sub": "asha", "exp": 1767225600}</code></div>
+          <div class="j3b"><b>Signature</b><span>proves nobody changed it</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PART 3 ============ -->
+  <div class="part"><span class="part-num">Part 3</span><h2>Try it yourself</h2><p>Everything from Parts 1 and 2, working together in one small API.</p></div>
+
+  <section class="step step--wide" id="playground" data-title="API playground" data-step="16">
+    <div class="step-text">
+      <span class="step-num">Step 16</span>
+      <h2>The API playground</h2>
+      <p>Below is a complete Todo API, running right in your browser. It follows the same rules as the real FastAPI app in <a href="example/main.py">example/main.py</a>, which was tested against real FastAPI and gives the same responses. Send requests, break things on purpose, and watch what the server does at each stage.</p>
+      <p class="muted small">Write operations (POST, PUT, PATCH, DELETE) need the header <code>Authorization: Bearer secret-token</code>. Use the checkbox to add it.</p>
+    </div>
+    <div class="stage pg">
+      <div class="chips" id="pgChips"></div>
+      <div class="pg-grid">
+        <div class="pg-left">
+          <form class="pg-form" id="pgForm" autocomplete="off">
+            <div class="pg-line">
+              <select id="pgMethod" aria-label="Method">
+                <option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option>
+              </select>
+              <input id="pgUrl" type="text" value="/todos" aria-label="URL path">
+              <button class="btn primary sm" type="submit">Send</button>
+            </div>
+            <label class="pg-auth"><input type="checkbox" id="pgAuth"> <code>Authorization: Bearer secret-token</code></label>
+            <label class="pg-label" for="pgBody">JSON body</label>
+            <textarea id="pgBody" rows="5" spellcheck="false" placeholder="(no body)"></textarea>
+          </form>
+          <div class="pg-curl"><span class="raw-tag">Same request with curl</span><pre id="pgCurl"></pre></div>
+          <div class="pg-db">
+            <div class="pg-db-head"><span class="raw-tag">🗄️ In-memory database</span><button type="button" class="link-btn" id="pgReset">Reset data</button></div>
+            <table class="crud-table"><thead><tr><th>id</th><th>title</th><th>done</th></tr></thead><tbody id="pgDb"></tbody></table>
+          </div>
+        </div>
+        <div class="pg-right">
+          <span class="raw-tag">What happened on the server</span>
+          <ol class="pg-trace" id="pgTrace"></ol>
+          <div class="resp-box" id="pgResp"><p class="muted small">Send a request to see the response.</p></div>
+          <div class="pg-code" id="pgCodeWrap" hidden><span class="raw-tag">Handled by this FastAPI code</span><pre class="code" id="pgCode"></pre></div>
+        </div>
+      </div>
+      <details class="pg-full">
+        <summary>📄 Show the complete FastAPI code for this API (main.py)</summary>
+        <pre class="code" id="pgFullCode"></pre>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ PART 4 ============ -->
+  <div class="part"><span class="part-num">Part 4</span><h2>Going further</h2><p>You can now build a working API. Here's how real projects grow from here.</p></div>
+
+  <section class="extra" id="run-it" data-title="Run it for real">
+    <h2>Run the example on your computer</h2>
+    <div class="run-grid">
+<pre class="code" data-lang="sh">
+$ cd example
+$ pip install -r requirements.txt
+$ uvicorn main:app --reload
+INFO:  Uvicorn running on http://127.0.0.1:8000
+</pre>
+      <ul class="ticks">
+        <li>Open <code>http://127.0.0.1:8000/docs</code> to try every endpoint.</li>
+        <li>Run the tests with <code>pytest</code>. They use FastAPI's <code>TestClient</code>.</li>
+        <li><code>--reload</code> restarts the server whenever you save a file.</li>
+        <li>Newer FastAPI versions also offer <code>fastapi dev main.py</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="extra" id="production" data-title="Towards production">
+    <h2>From tutorial to real project</h2>
+    <div class="cards">
+      <article class="card"><h3>🗄️ A real database</h3><p>Swap the in-memory dict for PostgreSQL using SQLAlchemy or SQLModel. Use Alembic to manage schema changes (migrations).</p></article>
+      <article class="card"><h3>📁 Project structure</h3><p>Split endpoints into files with <code>APIRouter</code>: <code>routers/todos.py</code>, <code>routers/users.py</code>, plus <code>models.py</code> and <code>db.py</code>.</p></article>
+      <article class="card"><h3>🧪 Testing</h3><p><code>TestClient</code> + <code>pytest</code> call your API without a running server. Override dependencies to use a test database.</p></article>
+      <article class="card"><h3>🔐 Settings & secrets</h3><p>Keep passwords and keys out of code. Load them from environment variables with <code>pydantic-settings</code> and a <code>.env</code> file.</p></article>
+      <article class="card"><h3>🌍 CORS</h3><p>If a browser frontend on another domain calls your API, add <code>CORSMiddleware</code>, or the browser will block the responses.</p></article>
+      <article class="card"><h3>🚀 Deployment</h3><p>Package the app with Docker and run it on a cloud service such as Render, Railway, Fly.io or AWS, behind HTTPS.</p></article>
+      <article class="card"><h3>⏱️ Background tasks</h3><p>Send emails or process files after responding, using <code>BackgroundTasks</code>, or a job queue for heavy work.</p></article>
+      <article class="card"><h3>🔄 WebSockets</h3><p>For live chat or streaming AI responses, FastAPI supports WebSockets and streaming responses too.</p></article>
+    </div>
+  </section>
+
+  <section class="extra" id="pitfalls" data-title="Common pitfalls">
+    <h2>Common beginner mistakes</h2>
+    <div class="cards">
+      <article class="card"><h3>Blocking inside async</h3><p><code>time.sleep()</code> or <code>requests</code> inside <code>async def</code> freezes every request. See Step 13.</p></article>
+      <article class="card"><h3>Leaking private fields</h3><p>Returning a user object that contains a password hash? Use <code>response_model</code> to control exactly what goes out.</p></article>
+      <article class="card"><h3>200 for everything</h3><p>Returning <code>{"error": "not found"}</code> with status 200 confuses clients. Raise <code>HTTPException(404)</code> instead.</p></article>
+      <article class="card"><h3>Secrets in code</h3><p>An API key committed to GitHub is a leaked API key. Use environment variables.</p></article>
+      <article class="card"><h3>No pagination</h3><p>Returning 100,000 rows in one response is slow. Add <code>limit</code> and <code>offset</code> (or cursor) query parameters.</p></article>
+      <article class="card"><h3>Global in-memory state</h3><p>Our example stores data in a dict. With several worker processes, each one has its own copy. Use a database.</p></article>
+    </div>
+  </section>
+
+  <section class="extra" id="glossary" data-title="Glossary">
+    <h2>Glossary</h2>
+    <dl class="glossary" id="glossaryList"></dl>
+  </section>
+
+  <section class="extra" id="quiz" data-title="Quick quiz">
+    <h2>Quick quiz</h2>
+    <p class="muted">Eight questions to check what stuck.</p>
+    <div class="quiz" id="quizBox"></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p><b>Backend APIs & FastAPI, step by step</b>, a beginner's visual guide.</p>
+  <p>Created by <a href="https://www.linkedin.com/in/darshan-ramani/" target="_blank" rel="noopener">Darshan Ramani</a> · Also see <a href="https://darshanramani.github.io/rag-step-by-step/" target="_blank" rel="noopener">RAG, step by step</a> · <a href="#top">Back to top ↑</a></p>
+</footer>
+
+<script src="js/highlight.js"></script>
+<script src="js/data.js"></script>
+<script src="js/code-data.js"></script>
+<script src="js/fakeapi.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/playground.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
